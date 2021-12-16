@@ -18,19 +18,15 @@ class Chat implements MessageComponentInterface {
     }
 
     public function onMessage(ConnectionInterface $from, $msg) {
-        $msg = json_decode($msg);
-        $numRecv = count($this->clients) - 1;
-        //echo sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n"
-        //    , $from->resourceId, $msg, $numRecv, $numRecv == 1 ? '' : 's');
-
-        //foreach ($this->clients as $client) {
-        //    if ($from !== $client) {
-                // The sender is not the receiver, send to each client connected
-        //        $client->send($msg);
-        //    }
-        //}
-        switch ($msg->type) {
+        /* $msg = {
+            "type": "type",
+            "msg": "msg"
+        } */
+        $msg = json_decode($msg); // Gör om JSON-string till php object för enklare hantering
+        
+        switch ($msg->type) { // Switch case stats på type i $msg
             case "client_connect":
+            //När en client kopplas upp skickas de till resterande clients och framörallt NodeMCU
               foreach ($this->clients as $client) {
                 if ($from !== $client) {
                     print_r($msg);
@@ -39,6 +35,7 @@ class Chat implements MessageComponentInterface {
               }
               break;
               case "server_connect":
+                //När NodeMcu Server kopplas upp till socket-servern så skickas det ut tilla alla clienter så de kan uppdatera sin sida  
                 foreach ($this->clients as $client) {
                   if ($from !== $client) {
                       $client->send(json_encode($msg));
@@ -46,6 +43,7 @@ class Chat implements MessageComponentInterface {
                 }
                 break;
             case "send_state":
+                //NodeMcu skickar sin state på gardinen till alla clienter för att kunna uppdatera utseendet
                 foreach ($this->clients as $client) {
                     if ($from !== $client) {
                         $client->send(json_encode($msg));
@@ -53,6 +51,7 @@ class Chat implements MessageComponentInterface {
                 }
                 break;
             case "client_action":
+                //client skickar frågan om att flytta gardinen
                 foreach ($this->clients as $client) {
                     if ($from !== $client) {
                         $client->send(json_encode($msg));

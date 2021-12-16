@@ -9,6 +9,7 @@ conn.onmessage = function(e) {
     let msg=JSON.parse(e.data).msg;
     let type=JSON.parse(e.data).type;
     console.log(type);
+    //Servern skickar statusen på gardinen och ändrar knapparna beroende på svaret.
     switch(type){
         case "send_state":
             if(msg=="down"){
@@ -29,13 +30,14 @@ conn.onmessage = function(e) {
     }
 };
 
+//När man klickar på knappen skickas ett socket meddelande till servern som säger till att den ska upp.
 document.querySelector("#up").addEventListener("click", function(){
     conn.send(JSON.stringify({
         type:"client_action", 
         msg:"up"
     }))
 });
-
+//När man klickar på knappen skickas ett socket meddelande till servern som säger till att den ska ner.
 document.querySelector("#down").addEventListener("click", function(){
     conn.send(JSON.stringify({
         type:"client_action", 
