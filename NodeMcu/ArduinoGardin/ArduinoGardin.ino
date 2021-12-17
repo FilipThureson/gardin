@@ -12,6 +12,13 @@ String state = "up";
 WebSocketsClient webSocket;
 #define USE_SERIAL Serial
 
+int A = 14;
+int B = 12;
+int C = 13;
+int D = 5;
+long del = 20000;
+int stap = 1;
+
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
 	switch(type) {
 		case WStype_DISCONNECTED:
@@ -69,6 +76,7 @@ void onMessage(uint8_t * data)
    }else if(type == "client_action"){ // När clienten skickar att de ska flytta gardinen
         if(msg == "up"){
           //MOVING THE BLINDS UP 
+          moveBlind();
           state = "up";
           doc["type"] = "send_state";
           doc["msg"] = state;
@@ -77,6 +85,7 @@ void onMessage(uint8_t * data)
           webSocket.sendTXT(data_to_send);
         }else if(msg == "down"){
           //MOVING THE BLINDS DOWN
+          moveBlind();
           state = "down";
           doc["type"] = "send_state";
           doc["msg"] = state;
@@ -101,6 +110,10 @@ void onMessage(uint8_t * data)
 }
 
 void setup() {
+  pinMode(A, OUTPUT);     
+  pinMode(B, OUTPUT);     
+  pinMode(C, OUTPUT);     
+  pinMode(D, OUTPUT);
 	// USE_SERIAL.begin(921600);
 	USE_SERIAL.begin(115200);
 
@@ -117,7 +130,7 @@ void setup() {
 		delay(1000);
 	}
 
-	WiFiMulti.addAP("Filip", "Leksaker03");
+	WiFiMulti.addAP("tekniklabbet", "tekniklabbet");
 
 	//WiFi.disconnect();
 	while(WiFiMulti.run() != WL_CONNECTED) {
@@ -125,7 +138,7 @@ void setup() {
 	}
 
 	// server address, port and URL
-	webSocket.begin("te-auxilium.se", 8585, "/", "");
+	webSocket.begin("192.168.30.231", 8080, "/", "");
 
 	// event handler
 	webSocket.onEvent(webSocketEvent);
@@ -143,6 +156,55 @@ void setup() {
   //webSocket.enableHeartbeat(15000, 3000, 2);
 
 }
+
+void moveBlind(){
+  for (int i=0; i<=500; i++){
+    een(); 
+    twee();
+    drie();
+    vier();
+  }
+  motorOff();
+}
+
+void een(){
+  digitalWrite(A, HIGH);   
+  digitalWrite(B, HIGH);   
+  digitalWrite(C, HIGH);   
+  digitalWrite(D, HIGH); 
+  Serial.println("een");  
+  delayMicroseconds(del);
+}
+void twee(){
+  digitalWrite(A, LOW);   
+  digitalWrite(B, HIGH);   
+  digitalWrite(C, LOW);   
+  digitalWrite(D, HIGH); 
+   Serial.println("twee");    
+  delayMicroseconds(del);
+}
+void drie(){
+  digitalWrite(A, HIGH);   
+  digitalWrite(B, LOW);   
+  digitalWrite(C, LOW);   
+  digitalWrite(D, HIGH);   
+   Serial.println("drie");  
+  delayMicroseconds(del);
+}
+void vier(){
+  digitalWrite(A, HIGH);   
+  digitalWrite(B, LOW);   
+  digitalWrite(C, HIGH);   
+  digitalWrite(D, LOW); 
+  Serial.println("vier");  
+  delayMicroseconds(del);
+}
+void motorOff(){
+  digitalWrite(A, LOW);   
+  digitalWrite(B, LOW);   
+  digitalWrite(C, LOW);   
+  digitalWrite(D, LOW);   
+} 
 
 void loop() {
 	webSocket.loop();
